@@ -1,0 +1,11 @@
+streamlit
+pymongo
+pyjwt
+bcrypt
+pdfplumber
+python-docx
+pandas
+numpy
+scikit-learn
+plotly
+google-generativeai
