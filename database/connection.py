@@ -6,6 +6,7 @@ from pymongo.server_api import ServerApi
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
+MONGO_SERVER_API_VERSION = "1"
 
 
 class MongoConnection:
@@ -15,7 +16,7 @@ class MongoConnection:
     def get_client(cls) -> MongoClient:
         if cls._client is None:
             uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
-            cls._client = MongoClient(uri, server_api=ServerApi("1"), connect=False)
+            cls._client = MongoClient(uri, server_api=ServerApi(MONGO_SERVER_API_VERSION), connect=False)
         return cls._client
 
     @classmethod

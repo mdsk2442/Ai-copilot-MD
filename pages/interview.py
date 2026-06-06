@@ -6,6 +6,7 @@ from interview_engine.question_generator import generate_questions
 from reports.generator import create_interview_session_payload
 
 ROLES = ["Software Engineer", "Data Analyst", "Frontend Developer", "Backend Developer", "Full Stack Developer"]
+MAX_INTERVIEW_QUESTIONS = 15
 
 
 def render(db, user_id):
@@ -44,13 +45,20 @@ def render(db, user_id):
     with st.form("answer_form"):
         st.markdown("### Submit Answers")
         answers = []
-        for i, q in enumerate(all_questions[:15], start=1):
+        for i, q in enumerate(all_questions[:MAX_INTERVIEW_QUESTIONS], start=1):
             answers.append(st.text_area(f"Q{i}: {q}", height=80))
         submitted = st.form_submit_button("Evaluate Answers")
 
     if submitted:
-        evaluation = evaluate_answers(role, all_questions[:15], answers)
-        payload = create_interview_session_payload(ObjectId(user_id), selected_resume["_id"], role, all_questions[:15], answers, evaluation)
+        evaluation = evaluate_answers(role, all_questions[:MAX_INTERVIEW_QUESTIONS], answers)
+        payload = create_interview_session_payload(
+            ObjectId(user_id),
+            selected_resume["_id"],
+            role,
+            all_questions[:MAX_INTERVIEW_QUESTIONS],
+            answers,
+            evaluation,
+        )
         db.interview_sessions.insert_one(payload)
         st.session_state["latest_interview"] = evaluation["scores"]["overall"]
 

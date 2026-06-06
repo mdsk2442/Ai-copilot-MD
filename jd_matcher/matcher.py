@@ -7,6 +7,7 @@ EXPERIENCE_PATTERNS = [
     r"(\d+\+?\s*years?\s+of\s+experience)",
     r"experience\s*:\s*([^\n\.]+)",
 ]
+MAX_KEYWORDS = 120
 
 
 def analyze_job_description(jd_text: str, resume: dict) -> dict:
@@ -25,8 +26,7 @@ def analyze_job_description(jd_text: str, resume: dict) -> dict:
             experience_req = m.group(1)
             break
 
-    keywords = sorted(set(re.findall(r"[A-Za-z][A-Za-z\+\.#]{2,}", jd_text.lower())))
-    keyword_gaps = [k for k in keywords[:120] if k in jd_skills and k not in resume_skills]
+    keyword_gaps = [skill for skill in jd_skills if skill not in resume_skills][:MAX_KEYWORDS]
 
     return {
         "required_skills": jd_skills,

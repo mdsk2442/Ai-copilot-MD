@@ -17,7 +17,7 @@ class UserManager:
         if not is_valid_email(email):
             return False, "Invalid email format"
         if not is_strong_password(password):
-            return False, "Password must be 8+ chars with upper, lower, and number"
+            return False, "Password must be 8+ chars with upper, lower, number, and special character"
         if self.db.users.find_one({"email": email}):
             return False, "Email already registered"
 

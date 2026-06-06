@@ -5,19 +5,26 @@ from typing import Any
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
+_GEMINI_READY: bool | None = None
 
 
 def _configure() -> bool:
+    global _GEMINI_READY
+    if _GEMINI_READY is not None:
+        return _GEMINI_READY
     api_key = os.getenv("GEMINI_API_KEY", "")
     if not api_key:
+        _GEMINI_READY = False
         return False
     try:
         import google.generativeai as genai
 
         genai.configure(api_key=api_key)
+        _GEMINI_READY = True
         return True
     except Exception as exc:
         logger.warning("Gemini configuration failed: %s", exc)
+        _GEMINI_READY = False
         return False
 
 

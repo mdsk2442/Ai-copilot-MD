@@ -2,6 +2,8 @@ from collections import Counter
 
 from utils.gemini_integration import generate_text
 
+MAX_SKILLS_FOR_AI_PROMPT = 20
+
 
 def calculate_ats_score(resume: dict, jd_text: str = "") -> dict:
     strengths: list[str] = []
@@ -45,8 +47,16 @@ def calculate_ats_score(resume: dict, jd_text: str = "") -> dict:
 
     total = int(min(contact_score + section_score + skills_score + readability_score + keyword_score, 100))
 
+    safe_resume_summary = {
+        "skills": skills[:MAX_SKILLS_FOR_AI_PROMPT],
+        "education_count": len(resume.get("education", [])),
+        "experience_count": len(resume.get("experience", [])),
+        "projects_count": len(resume.get("projects", [])),
+        "certifications_count": len(resume.get("certifications", [])),
+        "ats_score": total,
+    }
     ai_suggestions = generate_text(
-        f"Provide 3 concise ATS improvement suggestions for this resume data: {resume}",
+        f"Provide 3 concise ATS improvement suggestions for this resume summary: {safe_resume_summary}",
         default="1) Quantify project impact.\n2) Align keywords with target role.\n3) Improve section clarity.",
     )
 

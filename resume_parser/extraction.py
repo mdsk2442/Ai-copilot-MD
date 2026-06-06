@@ -1,6 +1,7 @@
 import re
 import tempfile
 from datetime import UTC, datetime
+import os
 from pathlib import Path
 
 from resume_parser.docx_parser import extract_docx_text
@@ -24,7 +25,7 @@ def _extract_section_lines(text: str, keywords: list[str]) -> list[str]:
         if any(k in lower for k in keywords):
             capture = True
             continue
-        if capture and any(token in lower for token in ["education", "experience", "project", "certification", "skills"]):
+        if capture and any(token in lower for token in ["education", "experience", "projects", "certifications", "skills"]):
             capture = False
         elif capture:
             out.append(line)
@@ -38,7 +39,7 @@ def extract_resume_entities(text: str) -> dict:
     lines = [ln.strip() for ln in (text or "").splitlines() if ln.strip()]
     name = lines[0] if lines else "Unknown"
 
-    skills_guess = normalize_skills(re.split(r"[,|•\-]", " ".join(_extract_section_lines(text, ["skills", "tech stack"])) ))
+    skills_guess = normalize_skills(re.split(r"[,|•\-]", " ".join(_extract_section_lines(text, ["skills", "tech stack"]))))
     skills = normalize_skills(skills_guess + extract_known_skills(text))
 
     return {
@@ -59,13 +60,17 @@ def parse_resume_file(uploaded_file) -> dict:
         tmp.write(uploaded_file.getbuffer())
         path = tmp.name
 
-    text = ""
-    if suffix == ".pdf":
-        text = extract_pdf_text(path)
-    elif suffix == ".docx":
-        text = extract_docx_text(path)
-    else:
-        raise ValueError("Only PDF and DOCX are supported")
+    try:
+        text = ""
+        if suffix == ".pdf":
+            text = extract_pdf_text(path)
+        elif suffix == ".docx":
+            text = extract_docx_text(path)
+        else:
+            raise ValueError("Only PDF and DOCX are supported")
+    finally:
+        if os.path.exists(path):
+            os.unlink(path)
 
     entities = extract_resume_entities(text)
     entities["file_name"] = uploaded_file.name

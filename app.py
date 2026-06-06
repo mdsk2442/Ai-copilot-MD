@@ -1,3 +1,5 @@
+import os
+
 import streamlit as st
 
 from auth.user_manager import UserManager
@@ -86,6 +88,9 @@ def render_app(db: DatabaseManager, user_manager: UserManager):
 
 
 def main():
+    if not os.getenv("JWT_SECRET"):
+        st.error("JWT_SECRET is not configured. Please set it in environment variables before running the app.")
+        st.stop()
     load_css()
     db = DatabaseManager()
     user_manager = UserManager(db)

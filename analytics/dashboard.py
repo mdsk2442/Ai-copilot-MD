@@ -26,7 +26,9 @@ def interview_trend_chart(interview_scores: list[int]) -> go.Figure:
 
 
 def skill_distribution_chart(skills: list[str]) -> go.Figure:
-    counts = Counter(skills or ["none"])
+    if not skills:
+        return px.bar(pd.DataFrame({"Skill": [], "Count": []}), x="Skill", y="Count", title="Skill Distribution")
+    counts = Counter(skills)
     df = pd.DataFrame({"Skill": list(counts.keys()), "Count": list(counts.values())})
     return px.bar(df, x="Skill", y="Count", title="Skill Distribution")
 

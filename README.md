@@ -21,7 +21,7 @@ Production-ready Streamlit platform for resume intelligence, ATS analysis, JD ma
 - Backend: Python 3.12 modular architecture
 - Database: MongoDB Atlas (free tier)
 - Auth: JWT + bcrypt
-- AI: Gemini API (free tier) with prompt engineering and resume-context RAG-style prompting
+- AI: Gemini API (free tier) with prompt engineering and resume-context prompting
 
 ## Project Structure
 

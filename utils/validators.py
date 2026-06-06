@@ -7,16 +7,29 @@ COMMON_SKILLS = {
     "fastapi", "django", "flask", "streamlit", "pandas", "numpy", "scikit-learn",
     "power bi", "tableau", "git", "redis", "html", "css", "node.js", "linux",
 }
+PASSWORD_SPECIALS = set("!@#$%^&*()-_=+[]{}|;:,.<>?/~`")
 
 
 def is_valid_email(email: str) -> bool:
-    return bool(re.fullmatch(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", email or ""))
+    email = (email or "").strip()
+    if not email or "@" not in email or email.count("@") != 1:
+        return False
+    local, domain = email.split("@")
+    if not local or not domain or "." not in domain:
+        return False
+    if any(part == "" for part in domain.split(".")):
+        return False
+    return len(email) <= 254
 
 
 def is_strong_password(password: str) -> bool:
     if not password or len(password) < 8:
         return False
-    return any(c.isupper() for c in password) and any(c.islower() for c in password) and any(c.isdigit() for c in password)
+    has_upper = any(c.isupper() for c in password)
+    has_lower = any(c.islower() for c in password)
+    has_digit = any(c.isdigit() for c in password)
+    has_special = any(c in PASSWORD_SPECIALS for c in password)
+    return has_upper and has_lower and has_digit and has_special
 
 
 def normalize_skills(skills: Iterable[str]) -> list[str]:

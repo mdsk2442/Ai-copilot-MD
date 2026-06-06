@@ -21,11 +21,17 @@ class DatabaseManager:
         self.ensure_collections()
 
     def ensure_collections(self) -> None:
-        self.users.create_index([("email", ASCENDING)], unique=True)
-        self.resumes.create_index([("user_id", ASCENDING), ("created_at", ASCENDING)])
-        self.interview_sessions.create_index([("user_id", ASCENDING), ("created_at", ASCENDING)])
-        self.job_descriptions.create_index([("user_id", ASCENDING), ("created_at", ASCENDING)])
-        self.analytics.create_index([("user_id", ASCENDING)], unique=True)
+        for action in [
+            lambda: self.users.create_index([("email", ASCENDING)], unique=True),
+            lambda: self.resumes.create_index([("user_id", ASCENDING), ("created_at", ASCENDING)]),
+            lambda: self.interview_sessions.create_index([("user_id", ASCENDING), ("created_at", ASCENDING)]),
+            lambda: self.job_descriptions.create_index([("user_id", ASCENDING), ("created_at", ASCENDING)]),
+            lambda: self.analytics.create_index([("user_id", ASCENDING)], unique=True),
+        ]:
+            try:
+                action()
+            except OperationFailure as exc:
+                logger.warning("Index creation skipped: %s", exc)
 
         validators = {
             "users": {
@@ -54,6 +60,8 @@ class DatabaseManager:
 
         for collection, validator in validators.items():
             try:
+                # Use moderate validation so legacy documents remain readable while
+                # all new inserts/updates are validated against the schema.
                 self.db.command({"collMod": collection, "validator": validator, "validationLevel": "moderate"})
             except OperationFailure:
                 logger.info("Validator update skipped for %s", collection)
